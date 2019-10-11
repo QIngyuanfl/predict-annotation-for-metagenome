@@ -1,2 +1,1 @@
-# predict4metagenome
-宏基因组预测
+# 宏基因组预测与注释
