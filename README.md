@@ -23,7 +23,7 @@ $ conda activate /sysdata/Meta/conda_envs/py374
 - FileUtilx(本地库)
 
 ### 配置档设置
-* [metagenome_config_2taxa.txt]()
+* [metagenome_config_2taxa.txt](./pipeline/metagenome_config_2taxa.txt)
 
 ## 流程执行
 ```sh
