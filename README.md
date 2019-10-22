@@ -35,7 +35,7 @@ $ nohup sh predict.sh > predict.log &
 $ nohup sh annotation.sh > annotation.log &
 ```
 ## 流程图
-
+![流程图](https://github.com/QIngyuanfl/predict-annotation-for-metagenome/blob/master/bpmn-with-drawio.png)
 ## 结果文件
 
 ## 新特性
