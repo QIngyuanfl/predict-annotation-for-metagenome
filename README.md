@@ -34,14 +34,17 @@ $ nohup sh predict.sh > predict.log &
 # 待预测完成后， 注释
 $ nohup sh annotation.sh > annotation.log &
 ```
+## 流程图
+
 ## 结果文件
 
 ## 新特性
+- [邮箱通知](./mailx.md)
 - 注释效率提高8倍
 - 预测效率提高1.2倍
 - 预测与注释在配置档增设CPU配置
 - [keggMapper.py]()-异步爬取kegg数据库
-- [vfdb_classsum_and_plot.py]()-解决文字遮挡的问题
+- [vfdb_classsum_and_plot.py]()-修正文字遮挡的问题
 - [分序列并行化]()
 
 ## FAQs

@@ -410,9 +410,9 @@ if is_complete == "True":
     print('\n' , file = f)
     print("echo 3.gene prediciton processing end !!" , file = f)
     print('\n' , file = f)
-    print("python", sampleUtility, 'Check_utility_for_sample.txt', sys.argv[1], file = f)
+    print("python", sampleUtility, 'Check_utility_for_Sample.txt', sys.argv[1], file = f)
     print('\n' , file = f)
-    print("chmod -R 777*", file = f)
+    print("chmod -R 777 *", file = f)
     f.close()
 
     # 4.annotation processing
@@ -481,7 +481,7 @@ if is_complete == "True":
         print("python", metaphlan_hclust_heatmap, "--in merged_abundance_table.txt --out merged.heatmap.pdf -m average -d braycurtis -f correlation --tax_lev s", file = f)
         print("python", metaphlan_hclust_heatmap, "--in merged_abundance_table.txt --out merged.heatmap.png -m average -d braycurtis -f correlation --tax_lev s")
         print("perl", ktImportRDP, sample_list[0] + ".krona.txt," + sample_list[0], file = f)
-    print("python", sampleUtility, 'Check_utility_for_sample.txt', sys.argv[1], file = f)
+    print("python", sampleUtility, 'Check_utility_for_Sample.txt', sys.argv[1], file = f)
     print("chmod -R 777 *", file =f) 
     f.close()
 

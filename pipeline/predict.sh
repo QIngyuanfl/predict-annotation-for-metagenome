@@ -30,4 +30,4 @@ echo 3.gene prediciton processing end !!
 python /sysdata/Meta/script/sampleUtility.py Check_utility_for_sample.txt metagenome_config_2taxa.txt
 
 
-chmod -R 777*
+chmod -R 777 *

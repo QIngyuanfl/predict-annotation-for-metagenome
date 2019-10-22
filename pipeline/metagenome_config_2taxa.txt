@@ -2,7 +2,7 @@
 # @@ input @@
 
 # == Project information ==
-name: 张智闵
+name: DonaldTrump 
 client: 美格生物研究院
 item_number: MGBJ20180504A2196C-2N
 total_samples: 6
