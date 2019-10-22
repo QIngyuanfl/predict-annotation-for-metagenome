@@ -84,9 +84,10 @@ for line in config_file :
         monitor = list[1];
     elif list[0] == 'multiTask_to_run:':
         multiTask_to_run = list[1];
-    elif list[0] == 'predict_core':
+    elif list[0] == 'sampleUtility:':
+        sampleUtility = list[1];
+    elif list[0] == 'predict_core:':
         predict_core = list[1];
-    
     elif list[0] == 'gene_nr_taxonomies:':
         gene_nr_taxonomies = list[1];
     elif list[0] == 'mapping_file:':
@@ -364,8 +365,8 @@ print("cp", Output + "1.clean_data" + "/" + "clean_reads_file.list", Output + "2
 
 print('\n')
 print("export MPLBACKEND=\"Agg\"")
-#print "python", assemble4metaGenome, "-f", Output + "2.assembly" + "/" + "clean_reads_file.list", "-d", Output + "2.assembly", "-m", model, "-t", toolkit, "--mink", mink, "--maxk", maxk, "--step", step, "--threads", threads, "--memory", memory, "--length", contig_length 
-print("/home/chihminchang/Metagenomics/Meta_shotgun/bin/time-1.9/time", "-a -o", Output + "../source_results.txt -f", "\'" + "Assembly","%e","%M\'", "python", assemble4metaGenome, "-f", Output + "2.assembly" + "/" + "clean_reads_file.list", "-d", Output + "2.assembly", "-m", model, "-t", toolkit, "--mink", mink, "--maxk", maxk, "--step", step, "--threads", threads, "--memory", memory, "--length", contig_length) 
+#print "python", assemble4metaGenome, "-f", Output + "2.assembly" + "/" + "clean_reads_file.list", "-d", Output + "2.assembly", "-m", model, "-t", toolkit, "--mink", mink, "--maxk", maxk, "---step", step, "--threads", threads, "--memory", memory, "--length", contig_length 
+print("/home/chihminchang/Metagenomics/Meta_shotgun/bin/time-1.9/time", "-a -o", Output + "../source_results.txt -f", "\'" + "Assembly","%e","%M\'", "python", assemble4metaGenome, "-f", Output + "2.assembly" + "/" + "clean_reads_file.list", "-d", Output + "2.assembly", "-m", model, "-t", toolkit, "--mink", mink, "--maxk", maxk, "---step", step, "--threads", threads, "--memory", memory, "--length", contig_length) 
 
 print('\n')
 print("echo 2.assembly processing end !!")
@@ -390,16 +391,16 @@ print('\n', file = f)
 #print "python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "-n", "T"
 
 print("echo 3.1 orf prediciton processing start !!" , file = f)
-print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "-step", "1", "-p", predict_core, file = f)
+print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "--step", "1", "-t", predict_core, file = f)
 print("echo 3.1 orf prediciton processing end!!" , file = f)
 
 if is_complete == "True":
     print("echo 3.2 gene catalogue processing start!!" , file = f)
-    print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "-step", "2", "-p", predict_core, file = f)
+    print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "--step", "2", "-t", predict_core, file = f)
     print("echo 3.2 gene catalogue processing end!!" , file = f)
 
     print("echo 3.3 gene depth processing start!!" , file = f)
-    print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "-step", "3", "-p", predict_core, file = f)
+    print("python", genePredict4metaGenome, "-q", Output + "3.gene_predict" + "/" + "clean_reads_file.list", "-f", Output + "3.gene_predict" + "/" + "assemble_seq.list", "-d", Output + "3.gene_predict", "--step", "3", "-t", predict_core, file = f)
 
     print("echo 3.3 gene depth processing end!!" , file = f)
     print('\n' , file = f)
@@ -409,6 +410,9 @@ if is_complete == "True":
     print('\n' , file = f)
     print("echo 3.gene prediciton processing end !!" , file = f)
     print('\n' , file = f)
+    print("python", sampleUtility, 'Check_utility_for_sample.txt', sys.argv[1], file = f)
+    print('\n' , file = f)
+    print("chmod -R 777*", file = f)
     f.close()
 
     # 4.annotation processing
@@ -429,14 +433,14 @@ if is_complete == "True":
     print("export MPLBACKEND=\"Agg\"", file = f)
 
     #201909
-    print("echo", "python", geneAnnotate4metaGenome, "-p", Output + "4.annotation" + "/" + "gene_catalogue.faa", "-g", "Unigenes", "-o", Output + "4.annotation" + "/" + "Unigenes", "-n", content, "-t", threads_per_task, "-e", evalue, "-a", Output + "4.annotation" + "/" + "gene_abundance_table.txt", ">", Output + "4.annotation" + "/" + "annotate_task_cmd.sh", file = f)
+    print("echo", "python", geneAnnotate4metaGenome, "-p", Output + "4.annotation" + "/" + "gene_catalogue.faa", "-g", "Unigenes", "-o", Output + "4.annotation" + "/" + "Unigenes", "-n", content, "-t", threads_per_task, "-m", task_number, "-e", evalue, "-a", Output + "4.annotation" + "/" + "gene_abundance_table.txt", ">", Output + "4.annotation" + "/" + "annotate_task_cmd.sh", file = f)
     
     print('\n', file = f)
-
+    print('sh ', Output + "4.annotation" + "/" + "annotate_task_cmd.sh", file =f)
     print('\n', file = f)
     print("echo 4.annotation processing end !!", file = f)
     print('\n', file = f)
-
+    print('\n', file = f)
     # 5.taxa processing
     print("echo 5.taxa processing start", file = f)
     print("echo 2018V3-后续分析", file = f)
@@ -449,7 +453,6 @@ if is_complete == "True":
     print("ln -s", Output + "3.gene_predict" + "/" + "Gene" + "/" + "gene_depth" + "/" + "gene_abundance_table.txt", Output + "5.taxa" + "/" + "gene_abundance_table.txt", file = f)
     print("ln -s", Output + "4.annotation" + "/" + "Unigenes" + "/" + "NR" + "/" + "Unigenes_vs_nr_fortaxa.txt", Output + "5.taxa" + "/" + "Unigenes_vs_nr_fortaxa.txt", file = f)
 
-    #print "python", gene_nr_taxonomies, "-p", Output + "5.taxa" + "/" + "gene_catalogue.faa", "-n", Output + "5.taxa" + "/" + "Unigenes_vs_nr_fortaxa.txt", "-a", Output + "5.taxa" + "/" + "gene_abundance_table.txt", "-o", Output + "5.taxa" + "/" + "common_taxonomic"
 
     print("python", gene_nr_taxonomies, "-p", Output + "5.taxa" + "/" + "gene_catalogue.faa", "-n", Output + "5.taxa" + "/" + "Unigenes_vs_nr_fortaxa.txt", "-a", Output + "5.taxa" + "/" + "gene_abundance_table.txt", "-o", Output + "5.taxa" + "/" + "common_taxonomic", file = f)
 
@@ -465,7 +468,7 @@ if is_complete == "True":
         print("cp", Output + "sample_groups_info" + "/" + "sample_" + category_list[g-1] + ".tsv", Output + "sample_groups_info" + "/" + category_list[g-1] + "/.", file = f)
         print("cp", Output + "sample_groups_info" + "/" + "sample_ids.tsv", Output + "sample_groups_info" + "/" + category_list[g-1] + "/.", file = f)
 
-        print("python", metaphlan2_taxonomies, "-q", Output + "5.taxa" + "/" + "clean_reads_file.list", "-o", Output + "5.taxa" + "/" + "metaphlan2_taxonomic", "-g", Output + "sample_groups_info" + "/" + category_list[g-1], file = f)
+        print("python", metaphlan2_taxonomies, "-q", Output + "5.taxa" + "/" + "clean_reads_file.list", "-o", Output + "5.taxa" + "/" + "metaphlan2_taxonomic", "-g", Output + "sample_groups_info" + "/" + category_list[g-1], "-t", int(threads_per_task)*int(task_number), file = f)
 
         g += 1;
     print('\n', file = f)
@@ -478,17 +481,16 @@ if is_complete == "True":
         print("python", metaphlan_hclust_heatmap, "--in merged_abundance_table.txt --out merged.heatmap.pdf -m average -d braycurtis -f correlation --tax_lev s", file = f)
         print("python", metaphlan_hclust_heatmap, "--in merged_abundance_table.txt --out merged.heatmap.png -m average -d braycurtis -f correlation --tax_lev s")
         print("perl", ktImportRDP, sample_list[0] + ".krona.txt," + sample_list[0], file = f)
+    print("python", sampleUtility, 'Check_utility_for_sample.txt', sys.argv[1], file = f)
+    print("chmod -R 777 *", file =f) 
     f.close()
 
 
 
 #########################################################
-    print("source deactivate")
-    print("cd", current_location)
-    print("python", metagenome_clean, sys.argv[1], ">", "do_clean.sh") 
-    print("nohup sh do_clean.sh > do_clean.log &")
+    os.system("python", metagenome_clean, sys.argv[1], ">", "do_clean.sh") 
 
-    print("echo 分析流程完毕，进入资料整理环节 !!")
+    print("echo 分析解析完毕，进入运行环节 !!")
 
     print('\n')
     config_file.close()
