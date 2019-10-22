@@ -11,7 +11,11 @@ month: 10
 day: 10
 
 # == alert mail address ==
-mail_address: 598153063@qq.com
+mail_address: no_reply@none.com
+
+# ==Disk_threshold(G) Move? ==
+Disk_threshold: 0
+Is_move2StorePath: T
 
 # == current & fastq & mapping file location ==
 current_location: /sysdata/Meta/pipeline
@@ -21,7 +25,7 @@ mapping_file: /home/chihminchang/Metagenomics/Meta_shotgun/workspace/V3_pipeline
 # == The name for fastq & mapping file== (#ID 開頭不要數字)
 Sample_id: CB0 CB10 CB1 M1 M2 M3
 Sample_id_2: CB0 CB10 CB1 M1 M2 M3
-is_complete: False
+is_complete: True
 
 # == the common name for R1&R2 fastq ==
 R1R2_common: .R1.fq.gz .R2.fq.gz
@@ -38,6 +42,7 @@ Output: /sysdata/Meta/pipeline/metagenome_work_out/
 Clean_Output: /sysdata/Meta/pipeline/分析结果
 do_P2W_ios: do_P2W_ios.sh
 do_P2W_windows: do_P2W_windows.sh
+Project_store_path: /run/mgjy-metagenome-project-store/test_space/metagenome_work_out/
 
 # bin enviroment
 #Meta_shotgun: /home/chihminchang/miniconda2/envs/Meta-shotgun_test
@@ -53,20 +58,21 @@ metagenome_clean_sig: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenom
 All_bin: /sdd/pipeline/metaGenome_v3/bin/
 readsQC4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/readsQC4metaGenome.py
 assemble4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/assemble4metaGenome.py
-genePredict4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/genePredict4metaGenome.py
-geneAnnotate4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/geneAnnotate4metaGenome.py
+genePredict4metaGenome: /sysdata/Meta/script/predict/genePredict4metaGenome.py
+geneAnnotate4metaGenome: /sysdata/Meta/script/annotation/geneAnnotate4metaGenome.py
 gene_nr_taxonomies: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/gene_nr_taxonomies.py
 split_sample_group: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/split_sample_group.py
-metaphlan2_taxonomies: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/metaphlan2_taxonomies.py
+metaphlan2_taxonomies: /sysdata/Meta/script/annotation/metaphlan/metaphlan2_taxonomies.py
 beta_format: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/beta_format.r
 beta_nofactors_format: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/beta_nofactors_format.r
 merge_metaphlan_tables: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_env/metaphlan2/utils/merge_metaphlan_tables.py 
-metaphlan_hclust_heatmap: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_env/metaphlan2/utils/metaphlan_hclust_heatmap.py
+metaphlan_hclust_heatmap: /sysdata/Meta/script/annotation/metaphlan/metaphlan_hclust_heatmap.py
 ktImportRDP: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_env/Krona/KronaTools/bin/ktImportRDP
 
 # == script ==
 All_script: /sdd/pipeline/metaGenome_v3/script/
 monitor: /sysdata/Meta/script/monitor.py
+sampleUtility: /sysdata/Meta/script/sampleUtility.py
 multiTask_to_run: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/script/multiTask_to_run.py
 summarize_taxa_x: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/script/summarize_taxa_x.py
 diff_level_taxa_abundance_summary: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/script/diff_level_taxa_abundance_summary.py
@@ -149,35 +155,29 @@ Report_id: 【美格基因】宏基因组结题报告.docx
 
 ## [ 1. trimming 參數 ]
 # -m; 使用何种trim工具，默认是trimmomatic，可支持sickle、trimmomatic、adapterremoval
-method: trimmomatic
-# -p; phred type of reads, [33, 64], default is 33
-phred_type: 33
 # -t; params of Trimmomatic, default is "LEADING:3 TRAILING:3 SLIDINGWINDOW:5:20 MINLEN:50"
-tparam: LEADING:3 TRAILING:3 SLIDINGWINDOW:5:20 MINLEN:50
-# -c; 过滤的质量值，默认是20
-quality: 20
+trim_method: trimmomatic
+trim_param: LEADING:3 TRAILING:3 SLIDINGWINDOW:5:20 MINLEN:50 -phred33
+# 并行数
+trim_parallel: 3
 # -l; 长度过滤的阈值，单位为bp，默认是50
 length_cutoff: 50
 # -u; 对clean data是否做uniq。[T/F]
 uniq: T
-# -a; adapter file; 如果沒有請標註"None"
-adapter: None
 # -g; 是否去除宿主序列. 如果需要去除宿主序列，则提供宿主基因组(fasta format), 提供 host_genome 参数，该参数为宿主基因组所在目录路径; 如果沒有請標註"None"
 host_genome: None
 
 ## [ 2. assembly 參數 ]
 # -m; 拼接策略，分为个体拼接(single)和混合拼接(mix)model = single
-model: single
+model: Single
+#model: Mix
+#model: By:Condition1
 # -t; 使用何种拼接工具，默认是megahit，可支持idba spades meta_platanus megahit
-toolkit: megahit
-# (--mink, --maxk, --step);kmer设定
-mink: 35
-maxk: 95
-step: 20
-# --threads; 拼接过程中使用的线程数(threads)，默认是15
-threads: 15
-# --memory; 内存限定值，仅针对spades、meta_platanus，以Gb为单位，默认为500
-memory: 500
+assembly_parallel: 1
+assembly_method: megahit
+assembly_param: --k-min 35 --k-max 95 --k-step 20 --min-contig-len 500 -t 25 -m 0.8
+#assembly_method: metaspades
+#assembly_param: --meta -k 35,55,75,95 -t 8 -m 100
 # --length; contigs length threshold
 contig_length: 500
 
