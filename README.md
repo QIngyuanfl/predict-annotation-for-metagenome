@@ -24,16 +24,16 @@ $ conda activate /sysdata/Meta/conda_envs/py374
 - FileUtilx(本地库)
 
 ### 配置档设置
-* [metagenome_config_2taxa.txt](./pipeline/metagenome_config_2taxa.txt)
+* [metagenome_config_2taxa.txt](/pipeline/metagenome_config_2taxa.txt)
 
 ## 新特性
 - [邮箱通知](./mailx.md)
 - 注释效率提高8倍
 - 预测效率提高1.2倍
 - 预测与注释在配置档增设CPU配置
-- [keggMapper.py](./script/annotation/KEGG/keggMapper.md)-异步爬取kegg数据库
-- [vfdb_classsum_and_plot.py](./script/annotation/VF/vfdb_classsum_and_plot.md)-修正文字遮挡的问题
-- [分序列并行化](./Lib/FileUtilx.md)
+- [keggMapper.py](/script/annotation/KEGG/keggMapper.md)-异步爬取kegg数据库
+- [vfdb_classsum_and_plot.py](/script/annotation/VF/vfdb_classsum_and_plot.md)-修正文字遮挡的问题
+- [分序列并行化](/Lib/FileUtilx.md)
 
 ## 流程执行
 ```sh
@@ -45,7 +45,7 @@ $ nohup sh predict.sh > predict.log &
 $ nohup sh annotation.sh > annotation.log &
 ```
 ## 流程图
-![流程图](https://github.com/QIngyuanfl/predict-annotation-for-metagenome/blob/master/bpmn-with-drawio.png)
+![流程图](/bpmn-with-drawio.png)
 
 ## FAQs
 问：如何设置CPU和并行数量？\
