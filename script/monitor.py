@@ -14,12 +14,15 @@ def proc_tree(pid, include_parent):
     # process tree information at moment
     for p in children:
         with p.oneshot():
-            start_time=p.create_time()
-            now = time.time()
-            run_time = now - start_time
-            memory = p.memory_info().rss
-            cmdline = ' '.join(p.cmdline())
-            proc_info[cmdline] = [run_time, memory]
+            try:
+                start_time=p.create_time()
+                now = time.time()
+                run_time = now - start_time
+                memory = p.memory_info().rss
+                cmdline = ' '.join(p.cmdline())
+                proc_info[cmdline] = [run_time, memory]
+            except Exception as e:
+                print(f'PID {p.pid} has been gone')
      
     return proc_info
 
@@ -48,4 +51,7 @@ def main():
         df.to_csv(table_file, sep = '\t')
         time.sleep(1)
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) != 2:
+        print('usage: python monitor.py <pid>')
+    else:
+        main()
