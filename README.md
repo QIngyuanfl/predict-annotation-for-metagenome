@@ -31,6 +31,7 @@ $ conda activate /sysdata/Meta/conda_envs/py374
 - 注释效率提高8倍
 - 预测效率提高1.2倍
 - 预测与注释在配置档增设CPU配置
+- [监测进程运行时间和内存峰值](/script/monitor.md)
 - [keggMapper.py](/script/annotation/KEGG/keggMapper.md)-异步爬取kegg数据库
 - [vfdb_classsum_and_plot.py](/script/annotation/VF/vfdb_classsum_and_plot.md)-修正文字遮挡的问题
 - [分序列并行化](/Lib/FileUtilx.md)
