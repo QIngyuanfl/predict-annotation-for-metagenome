@@ -11,7 +11,7 @@ $ sh test.sh
 ```
 ## 结果输出
 
-|Queue|RunTime(s)|MaxMemory(b)|
+|Queue                                      |RunTime(s)                   |MaxMemory(b)|
 
 |sleep 10|10.271119117736816|368640.0|
 |sh test.sh|10.291218996047974|1421312.0|
