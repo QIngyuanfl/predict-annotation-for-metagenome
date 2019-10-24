@@ -20,6 +20,7 @@ $ conda activate /sysdata/Meta/conda_envs/py374
 - aiohttp
 - BeautifulSoup
 - pyecharts
+- psutil
 - FileUtilx(本地库)
 
 ### 配置档设置
