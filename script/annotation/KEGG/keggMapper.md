@@ -15,7 +15,7 @@ python keggMapper.py --ko gene2ko.txt -o Map
 ```
 
 ##  样张
-![颜色通路图](/test_space/test4annotation/4.annotation/Unigenes/KEGG/Map/map00010.png)
+![颜色通路图](../../../test_space/test4annotation/4.annotation/Unigenes/KEGG/Map/map00010.png)
 
 ## FAQ
 问: 如何处理连接超时的情况？\
