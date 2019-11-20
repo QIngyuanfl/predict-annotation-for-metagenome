@@ -1,0 +1,63 @@
+# Make file for metagenome analysis, statistics part.
+# Wed Nov 13 14:08:24 CST 2019
+# Author: Qingyuan Zhang
+# Version: V0.1
+# copyright: Magigene
+
+import os
+import pandas as pd
+
+configfile: 'config.yaml'
+workdir: config["workspace"]
+script_path = config["statistics_script"]
+mapping_file = config["samples"]
+mapping = pd.read_table(mapping_file, index_col = '#SampleID')
+rank = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+
+# Venn plot
+rule all:
+  input: 
+    expand('metagenome_work_out/5.taxa/common_taxonomic/abundance_table_{Rank}.biom', Rank = rank),
+    directory('metagenome_work_out/3.gene_predict/Gene/gene_Venn'),
+    directory('metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap')
+  benchmark:
+    "Check_utility.tsv"
+
+rule Venn:
+  input: 
+    OTU_table = 'metagenome_work_out/3.gene_predict/Gene/gene_depth/gene_abundance_table.txt',
+    mapped = mapping_file
+  output: directory('metagenome_work_out/3.gene_predict/Gene/gene_Venn')
+  params: 
+    interact = config["Venn"]   
+  threads: 30
+  log:'metagenome_work_out/3.gene_predict/Gene/gene_Venn/Venn.log'     
+  run:
+    shell('mkdir -p {output}')
+    shell("python {script_path}/Venn/Venn.py -i {input.OTU_table} -o {output} -a {params.interact} -m {input.mapped} -p {threads} 2> {log}")
+    shell('rm {output}/*.r')
+    shell('rm {output}/*.list')
+
+rule corr_heatmap:
+  input:
+    OTU_table = 'metagenome_work_out/3.gene_predict/Gene/gene_depth/gene_abundance_table.txt'
+  output:
+    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_table.csv',
+    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_pvalue.csv',
+    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_heatmap.pdf'
+  log:
+    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/corr_heatmap.log'
+  params:
+    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance'
+  shell:
+    """
+    Rscript {script_path}/corr/spearman_correlation.R {input} {params} 2 > {log}
+    """
+
+rule biom_convert:
+  input: 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt'
+  output:'metagenome_work_out/5.taxa/common_taxonomic/abundance_table_{rank}.biom'
+  shell:'biom convert -i {input} -o {output} --table-type="OTU table" --to-json' 
+
+rule ternary_plot:
+ 

@@ -1,0 +1,11 @@
+# Samples and their groups information(TSV format, columns: #SampleID, Condition?, SampleID
+samples: mapping.txt
+# Work Space Defination
+workspace: /sysdata/Meta/pipeline
+statistics_script: /sysdata/Meta/script/statistics
+# Venn plot configuration,for which samples to interact,format:(S1,S2,S3...S2,S3,S4)||(All)
+#Venn: All
+Venn: All 
+
+# Ternary plot configuration, for which samples to interact,format:(S1,S2,S3...S2,S3,S4)||(All))
+Ternary: All
