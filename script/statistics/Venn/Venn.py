@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Author: Qingyuan Zhang
+# Date: Wed Nov 20 17:03:20 CST 2019
+# version: 1.0
 import os
 import argparse
 from itertools import combinations
