@@ -57,10 +57,23 @@ def intersection(id_set):
     for i in id_set:
         with open(f'{arg.outfile}/{i}_uniq.list') as f:
              gene.append([line.strip() for line in f])
-    intercept =  reduce(lambda x,y : set(x) & set(y), gene)
-    return len(intercept)  
+    intersect =  reduce(lambda x,y : set(x) & set(y), gene)
+    return len(intersect)
 
-def draw_petal(condition, counter:dict, cross):
+def difference(ref_id:str, id_set:list):
+    gene = []
+    
+    id_set = list(id_set)
+    id_set.remove(ref_id)
+    for i in id_set:
+        with open(f'{arg.outfile}/{i}_uniq.list') as f:
+            gene.append([line.strip() for line in f])
+    with open(f'{arg.outfile}/{ref_id}_uniq.list') as f:        ref = set([line.strip() for line in f])
+    for i in gene:
+        ref -= set(i)
+    return len(ref)
+
+def draw_petal(condition, difference, cross):
     Petal_Rscript = os.path.join(arg.outfile, f'Petal_{condition.name}_All.r')
     with open(Petal_Rscript, 'w') as f:
         f.write(r'''
@@ -111,7 +124,7 @@ flower_plot2 <- function(sample, value, start, a, b,
 ''')
         sample = pd.unique(condition)
         N = len(sample)
-        N_uniq_list =  [str(counter[i]) for i in sample]
+        N_uniq_list =  [str(i) for i in difference]
         sample = ','.join([f'"{i}"' for i in sample])
         N_uniq_list = ','.join(N_uniq_list)
         f.write(f'''
@@ -180,8 +193,12 @@ def main():
     for i in mapping:
         id_set = pd.unique(mapping[i])
         if len(id_set) > 5:
+            difference_list = []
             inner = intersection(id_set)
-            draw_petal(mapping[i], gene_number_dict, inner)
+            for j in id_set:
+                difference_list.append(difference(j,id_set))
+                
+            draw_petal(mapping[i], difference_list, inner)
                 
                        
 if __name__ == "__main__":
