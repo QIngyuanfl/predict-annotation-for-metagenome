@@ -1,27 +1,25 @@
-# 宏基因组预测与注释
+# 宏基因组预测、注释与统计
 
 适用于已经质控并组装的宏基因项目
 
 ## 环境准备
 ### miniconda2 或miniconda3
 ```sh
-# 安装miniconda| linux
+# 安装miniconda| linux, 已装请忽略
 $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 $ sh Miniconda3-latest-Linux-x86_64.sh
-# miniconda 2
+# conda环境
+## 预测与注释环境
 $ source activate /sysdata/Meta/conda_envs/py374
-# miniconda 3
-$ conda activate /sysdata/Meta/conda_envs/py374
+## 统计环境
+$ source activate /sysdata/Meta/conda_envs/MetaSnakemake
+## lefse
+$ source activate /sysdata/Meta/conda_envs/lefse
 ```
-### python3.7.4 第三方库
-- pandas
-- matplotlib
-- Bio
-- aiohttp
-- BeautifulSoup
-- pyecharts
-- psutil
-- FileUtilx(本地库)
+### 第三方库
+
+
+
 
 ### 配置档设置
 * [metagenome_config_2taxa.txt](/pipeline/metagenome_config_2taxa.md)
