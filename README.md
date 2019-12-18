@@ -25,25 +25,28 @@ $ source activate /sysdata/Meta/conda_envs/lefse
 
 ### 配置档设置
 * [metagenome_config_2taxa.txt](/pipeline/metagenome_config_2taxa.md)
-* [config.yaml](/pipeline/metagenome_config_2taxa.yaml)-snakemake配置文件
+* [config.yaml](/pipeline/config.yaml)-snakemake配置文件
 ## 新特性
-- [邮箱通知](./mailx.md)
-- 注释效率提高8倍
-- 预测效率提高1.2倍
-- 预测与注释在配置档增设CPU配置
-- [监测进程运行时间和内存峰值](/script/monitor.md)
-- [keggMapper.py](/script/annotation/KEGG/keggMapper.md)-异步爬取kegg数据库
-- [vfdb_classsum_and_plot.py](/script/annotation/VF/vfdb_classsum_and_plot.md)-修正文字遮挡的问题
-- [分序列并行化](/Lib/FileUtilx.md)
+- [snakemake并行化]
+- [Venn图可选感兴趣的分组进行绘图]
+- [三元相图可选感兴趣的分组进行绘图]
+- [Beta多样性减少重复计算]
+- [UPGMA增加Condition绘图]
+- [消除vim进行替换脚本(R脚本优化)]
 
 ## 流程执行
 ```sh
 # 在当前文件夹生成流程脚本 predict.sh和annotation.sh
+$ source activate /sysdata/Meta/conda_envs/py374
 $ python metagenome_pipeline_2taxa.py metagenome_config_2taxa.txt
 # 宏基因组基因预测
 $ nohup sh predict.sh > predict.log &
 # 待预测完成后， 注释
 $ nohup sh annotation.sh > annotation.log &
+# 待注释完成后, 统计
+$ conda deactivate
+$ source activate /sydata/Meta/conda_envs/MetaSnakemake
+$ nohup snakemake --cores 32 > stat.log &
 ```
 ## 流程图
 ![流程图](/bpmn-with-drawio.png)
