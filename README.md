@@ -17,13 +17,15 @@ $ source activate /sysdata/Meta/conda_envs/MetaSnakemake
 $ source activate /sysdata/Meta/conda_envs/lefse
 ```
 ### 第三方库
+见下方conda环境
 
-
-
+- 预测与注释环境-[py374.yml](/conda_envs/py374.yml)
+- 统计环境-[snakemake.yml](/conda_envs/snakemake.yml)
+- lefse环境-[lefse.yml](/conda_envs/lefse.yml)
 
 ### 配置档设置
 * [metagenome_config_2taxa.txt](/pipeline/metagenome_config_2taxa.md)
-
+* [config.yaml](/pipeline/metagenome_config_2taxa.yaml)-snakemake配置文件
 ## 新特性
 - [邮箱通知](./mailx.md)
 - 注释效率提高8倍
