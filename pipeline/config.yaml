@@ -1,11 +1,18 @@
 # Samples and their groups information(TSV format, columns: #SampleID, Condition?, SampleID
 samples: mapping.txt
+# environment factors 
+#factors: 
+factors: factors.txt
 # Work Space Defination
-workspace: /sysdata/Meta/pipeline
+current_location: /sysdata/Meta/pipeline
 statistics_script: /sysdata/Meta/script/statistics
-# Venn plot configuration,for which samples to interact,format:(S1,S2,S3...S2,S3,S4)||(All)
-#Venn: All
-Venn: All 
+envs: /sysdata/Meta/conda_envs
+mail_address: 598153063@qq.com
+# Venn plot configuration,for which samples to interact,format:(S1,S2,S3;S2,S3,S4)||(All)
+Venn: All
+#Venn: CB,X,CB0;M1,M2,X;CB,A,B,M,X
 
-# Ternary plot configuration, for which samples to interact,format:(S1,S2,S3...S2,S3,S4)||(All))
+# Ternary plot configuration, for which samples to interact,format:(S1,S2,S3;S2,S3,S4)||(All))
 Ternary: All
+#Ternary: CB,X,CB0;M1,M2,X;CB,A,B 
+
