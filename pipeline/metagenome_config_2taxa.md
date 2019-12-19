@@ -20,13 +20,13 @@ day: 10
 
 \# == alert mail address ==
 
-**mail_address: no_reply@none.com**
+mail_address: no_reply@none.com
 
 \# ==Disk_threshold(int G) Move?(T/F) ==
 
-**Disk_threshold: 0**
+Disk_threshold: 0
 
-**Is_move2StorePath: T**
+Is_move2StorePath: T
 
 
 \# == current & fastq & mapping file location ==
@@ -78,11 +78,11 @@ Project_store_path: /run/mgjy-metagenome-project-store/test_space/metagenome_wor
 
 \#Meta_R: /home/chihminchang/miniconda2/envs/Meta-R2
 
-**Meta_py3: /sysdata/Meta/conda_envs/py374**
+Meta_py3: /sysdata/Meta/conda_envs/py374
 
 \# bin of clean and preduce the report!
 
-metagenome_clean: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/metagenome_clean_20181216.py
+**metagenome_clean: /sysdata/Meta/script/metagenome_clean.py**
 
 metagenome_clean_sig: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/metagenome_clean_sig_20181109.py
 
@@ -94,15 +94,15 @@ readsQC4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_
 
 assemble4metaGenome: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/assemble4metaGenome.py
 
-**genePredict4metaGenome: /sysdata/Meta/script/predict/genePredict4metaGenome.py**
+genePredict4metaGenome: /sysdata/Meta/script/predict/genePredict4metaGenome.py
 
-**geneAnnotate4metaGenome: /sysdata/Meta/script/annotation/geneAnnotate4metaGenome.py**
+geneAnnotate4metaGenome: /sysdata/Meta/script/annotation/geneAnnotate4metaGenome.py
 
 gene_nr_taxonomies: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/gene_nr_taxonomies.py
 
 split_sample_group: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin/split_sample_group.py
 
-**metaphlan2_taxonomies: /sysdata/Meta/script/annotation/metaphlan/metaphlan2_taxonomies.py**
+**metaphlan2_taxonomies:/sysdata/Meta/script/annotation/metaphlan/metaphlan2_taxonomies.py**
 
 beta_format: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/beta_format.r
 
@@ -116,11 +116,13 @@ ktImportRDP: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_
 
 \# == script ==
 
-**All_script: /sdd/pipeline/metaGenome_v3/script/**
+All_script: /sdd/pipeline/metaGenome_v3/script/
 
-**monitor: /sysdata/Meta/script/monitor.py**
+monitor: /sysdata/Meta/script/monitor.py
 
-**sampleUtility: /sysdata/Meta/script/sampleUtility.py**
+sampleUtility: /sysdata/Meta/script/sampleUtility.py
+**sum_nr_abundance: /sysdata/Meta/script/annotation/NR/sum_nr_abundance.py**
+**sum_metaphlan_abundance: /sysdata/Meta/script/annotation/metaphlan/sum_metaphlan_abundance.py**
 
 multiTask_to_run: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/script/multiTask_to_run.py
 
@@ -249,32 +251,20 @@ draw_VPA_cazy_L1: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3
 draw_VPA_cazy_family: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/draw_VPA_cazy_family.py
 
 \# 結題報告模板與輸出
-
-template_oo: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_oo.docx
-
-template_oo_id: 【美格基因】宏基因组结题报告模板-V3_oo.docx
-
-template_xo: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_xo.docx
-
-template_xo_id: 【美格基因】宏基因组结题报告模板-V3_xo.docx
-
-template_ox: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_ox.docx
-
-template_ox_id: 【美格基因】宏基因组结题报告模板-V3_ox.docx
-
-template_xx: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_xx.docx
-
-template_xx_id: 【美格基因】宏基因组结题报告模板-V3_xx.docx
-
-template_s1: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_s1.docx
-
-template_s1_id: 【美格基因】宏基因组结题报告模板-V3_s1.docx
-
-template_s2: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/template/【美格基因】宏基因组结题报告模板-V3_s2.docx
-
-template_s2_id: 【美格基因】宏基因组结题报告模板-V3_s2.docx
-
-Report_id: 【美格基因】宏基因组结题报告.docx
+**template_dir: /sysdata/Meta/template**
+**template_oo: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_oo.docx**
+**template_oo_id: 【美格基因】宏基因组结题报告模板-V3_oo.docx**
+**template_xo: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_xo.docx**
+**template_xo_id: 【美格基因】宏基因组结题报告模板-V3_xo.docx**
+**template_ox: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_ox.docx**
+**template_ox_id: 【美格基因】宏基因组结题报告模板-V3_ox.docx**
+**template_xx: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_xx.docx**
+**template_xx_id: 【美格基因】宏基因组结题报告模板-V3_xx.docx**
+**template_s1: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_s1.docx**
+**template_s1_id: 【美格基因】宏基因组结题报告模板-V3_s1.docx**
+**template_s2: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_s2.docx**
+**template_s2_id: 【美格基因】宏基因组结题报告模板-V3_s2.docx**
+**Report_id: 【美格基因】宏基因组结题报告.docx**
 
 /
 \#\# [ 1. trimming 參數 ]
