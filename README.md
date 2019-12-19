@@ -31,11 +31,14 @@ $ source activate /sysdata/Meta/conda_envs/lefse
 - [Venn图可选感兴趣的分组进行绘图](/script/statistics/Venn.md)
 - [三元相图可选感兴趣的分组进行绘图](/script/statistics/ternary.md)
 - Beta多样性减少重复计算
-
     1. Anosim, Adonis, Mrpp 减少计算6倍的次数
     2. 距离矩阵 减少计算30倍的次数
+    3. 减少作图次数，基于图层绘图，无需每一幅图不管有无labels或有无椭圆都运行一次绘图函数。
 - UPGMA增加Condition绘图
 - [消除vim进行替换脚本(R脚本优化)](/script/statistics/Rscript.md)
+- 预测模块命令行更新
+- 解决云端metaphlan2 lefse无法运行的问题
+- 更新metaphlan2 的heatmap 并与matplotlib版本相兼容
 
 ## 流程执行
 ```sh
