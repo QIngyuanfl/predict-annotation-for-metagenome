@@ -82,6 +82,7 @@ Meta_py3: /sysdata/Meta/conda_envs/py374
 
 \# bin of clean and preduce the report!
 
+
 **metagenome_clean: /sysdata/Meta/script/metagenome_clean.py**
 
 metagenome_clean_sig: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/bin_add/metagenome_clean_sig_20181109.py
@@ -121,7 +122,9 @@ All_script: /sdd/pipeline/metaGenome_v3/script/
 monitor: /sysdata/Meta/script/monitor.py
 
 sampleUtility: /sysdata/Meta/script/sampleUtility.py
+
 **sum_nr_abundance: /sysdata/Meta/script/annotation/NR/sum_nr_abundance.py**
+
 **sum_metaphlan_abundance: /sysdata/Meta/script/annotation/metaphlan/sum_metaphlan_abundance.py**
 
 multiTask_to_run: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenome_v3/script/multiTask_to_run.py
@@ -252,19 +255,33 @@ draw_VPA_cazy_family: /home/chihminchang/Metagenomics/Meta_shotgun/bin/metaGenom
 
 \# 結題報告模板與輸出
 **template_dir: /sysdata/Meta/template**
+
 **template_oo: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_oo.docx**
+
 **template_oo_id: 【美格基因】宏基因组结题报告模板-V3_oo.docx**
+
 **template_xo: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_xo.docx**
+
 **template_xo_id: 【美格基因】宏基因组结题报告模板-V3_xo.docx**
+
 **template_ox: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_ox.docx**
+
 **template_ox_id: 【美格基因】宏基因组结题报告模板-V3_ox.docx**
+
 **template_xx: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_xx.docx**
+
 **template_xx_id: 【美格基因】宏基因组结题报告模板-V3_xx.docx**
+
 **template_s1: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_s1.docx**
+
 **template_s1_id: 【美格基因】宏基因组结题报告模板-V3_s1.docx**
+
 **template_s2: /sysdata/Meta/template/【美格基因】宏基因组结题报告模板-V3_s2.docx**
+
 **template_s2_id: 【美格基因】宏基因组结题报告模板-V3_s2.docx**
+
 **Report_id: 【美格基因】宏基因组结题报告.docx**
+
 
 /
 \#\# [ 1. trimming 參數 ]
@@ -324,7 +341,7 @@ contig_length: 500
 /
 \#\# [ 3. gene_predict 參數 ]
 
-**predict_core: 12**
+predict_core: 12
 
 \#\# [ 4. annotation 參數 ]
 
@@ -346,16 +363,16 @@ evalue: 1e-10
 
 \# -t; number of threads to use in the BLAST search
 
-**threads_per_task: 20**
+threads_per_task: 20
 
 \# parallel task number
 
-**task_number: 3**
+task_number: 3
 
 /
 \#\# [ 6. taxa_statistics 參數 ]
 
-[cca&rda]
+#[cca&rda]
 
 \# path to the environment/other factors file. (The sample number must more than environment factor number!) ; 如果沒有請標註"None, 且檔名請固定"factors.txt"/
 factors_file: None
