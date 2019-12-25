@@ -2,7 +2,7 @@
 ## 第三方库
 * VennDiagram 
 ## 单独使用方法
-```
+``` sh
 python Venn.py -i abundance_table.txt -o Venn -c All -m mapping.txt -p 30
 usage: Venn.py [-h] [-i INFILE] [-o OUTFILE]
                [-c [COMBINATION [COMBINATION ...]]] [-m MAPPING] [-p CORES]
