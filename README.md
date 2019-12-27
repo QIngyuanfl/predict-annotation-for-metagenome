@@ -50,6 +50,7 @@ $ nohup sh predict.sh > predict.log &
 # 待预测完成后， 注释
 $ nohup sh annotation.sh > annotation.log &
 # 待注释完成后, 统计
+$ wget https://github.com/QIngyuanfl/predict-annotation-for-metagenome/edit/master/pipeline/Snakefile
 $ conda deactivate
 $ source activate /sydata/Meta/conda_envs/MetaSnakemake
 $ nohup snakemake --cores 32 > stat.log &
