@@ -20,9 +20,9 @@ if ncondition > 2:
     subclass = 2
 else:
     subclass = -1
-rank = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+rank = ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
 func = {'KEGG':['kegg-ko', 'kegg-L1', 'kegg-L2', 'kegg-L3'],
-#        'CAZy':['cazy-family', 'cazy-L1'],
+        'CAZy':['cazy-family', 'cazy-L1'],
         'NOG':['nog-L1', 'nog-L2']}
 func_keys = list(func.keys())
 func_values =  [i for j in list(func.values()) for i in j]
