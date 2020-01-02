@@ -1,40 +1,113 @@
 # Make file for metagenome analysis, statistics part.
-# Wed Nov 13 14:08:24 CST 2019
+# Thu Jan  2 10:39:19 CST 2020
 # Author: Qingyuan Zhang
-# Version: V0.1
-# copyright: Magigene
-
+# Version: V1.1
+# @copyright: Magigene
+import re
 import os
 import pandas as pd
 
 configfile: 'config.yaml'
-workdir: config["workspace"]
+workdir: config["current_location"]
 script_path = config["statistics_script"]
-mapping_file = config["samples"]
+envs_path = config["envs"]
+mapping_file = os.path.abspath(config["samples"])
+factors_file = config["factors"]
+mail = config["mail_address"]
 mapping = pd.read_table(mapping_file, index_col = '#SampleID')
+group_cnt = []
+for col in mapping:
+    if col == 'SampleID':
+        continue
+    cnt = mapping.groupby(col).count()
+    group_cnt += [x for y in cnt.values.tolist() for x in y]
+if 1 in group_cnt:
+    compare = False
+else:
+    compare = True
+ncondition = len(mapping.columns)
+if ncondition > 2:
+    subclass = 2
+else:
+    subclass = -1
 rank = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+func = {'KEGG':['kegg-ko', 'kegg-L1', 'kegg-L2', 'kegg-L3'],
+        'CAZy':['cazy-family', 'cazy-L1'],
+        'NOG':['nog-L1', 'nog-L2']}
+func_keys = list(func.keys())
+func_values =  [i for j in list(func.values()) for i in j]
 
-# Venn plot
+wildcard_constraints:
+  func_keys = '|'.join([x for x in func_keys]),
+  func_values = '|'.join([x for x in func_values])
+         
+ordi = ['DCA', 'CCA', 'RDA', 'NMDS', 'MDS', 'NMDS', 'PCoA']
+
+
 rule all:
   input: 
     expand('metagenome_work_out/5.taxa/common_taxonomic/abundance_table_{Rank}.biom', Rank = rank),
+    [f'metagenome_work_out/4.annotation/Unigenes/{key}/abundance_{value}.biom' for key, values in func.items() for value in values], 
     directory('metagenome_work_out/3.gene_predict/Gene/gene_Venn'),
-    directory('metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap')
+    directory('metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap'),
+    directory(expand('metagenome_work_out/6.taxa_statistics/samples_heatmap/{Rank}', Rank = rank)), 
+    directory([f'metagenome_work_out/7.func_statistics/{key}/samples_func_heatmap/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/beta/{Rank}/PCA', Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/beta/PCA/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/beta/{Rank}/ordination', Rank = rank)), 
+    directory([f'metagenome_work_out/7.func_statistics/{key}/beta/ordination/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_barplot/{Rank}',Rank = rank)), 
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_barplot/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_Venn/{Rank}',Rank = rank)), 
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_heatmap/{Rank}',Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_Venn/{value}' for key, values in func.items() for value in values]),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_heatmap/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_UPGMA/{Rank}',Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_UPGMA/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_sig_wilcox/{Rank}',Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_sig_wilcoxon/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_sig_ttest/{Rank}',Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_sig_ttest/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_bubble/{Rank}',Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_bubble/{value}' for key, values in func.items() for value in values]),
+    directory(expand('metagenome_work_out/6.taxa_statistics/taxa_Venn/{Rank}',Rank = rank)), 
+    directory('metagenome_work_out/6.taxa_statistics/taxa_lefse'),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_lefse/{value}' for key, values in func.items() for value in values]),
+    directory(expand("metagenome_work_out/6.taxa_statistics/taxa_env_heatmap/{Rank}", Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_env_heatmap/{value}' for key, values in func.items() for value in values]),
+    directory(expand("metagenome_work_out/6.taxa_statistics/taxa_vpa/{Rank}", Rank = rank)),
+    directory([f'metagenome_work_out/7.func_statistics/{key}/func_vpa/{value}' for key, values in func.items() for value in values]),
+    directory('metagenome_work_out/6.taxa_statistics/taxa_ternaryplot')
   benchmark:
     "Check_utility.tsv"
 
-rule Venn:
+onsuccess:
+    if os.path.exists("Check_Process_for_Sample.txt"):
+        df = pd.read_table("Check_Process_for_Sample.txt", index_col = 0)
+        df = df.drop('ALL')
+        df = df.apply(pd.to_numeric)
+        df['Statistics'] = 1
+        df.loc['ALL'] = df.mean().apply(lambda x: '%.2f%%' % (x*100))
+        df.to_csv("Check_Process_for_Sample.txt", sep = '\t', index_label = "SampleID")
+        if re.search(r'.*@.*com', str(mail)):
+            shell('mailx -v -s "$(pwd) workflow finish !" {mail} < Check_Process_for_Sample.txt')
+    
+
+onerror:
+  shell('cat $(ls -t .snakemake/log/* |head -n 1)|mailx -v -s "$(pwd) workflow exit with exitcode 1 !" {mail}')
+
+rule gene_Venn:
   input: 
     OTU_table = 'metagenome_work_out/3.gene_predict/Gene/gene_depth/gene_abundance_table.txt',
     mapped = mapping_file
   output: directory('metagenome_work_out/3.gene_predict/Gene/gene_Venn')
   params: 
-    interact = config["Venn"]   
-  threads: 30
+    interact = ' '.join(config["Venn"].split(';'))   
+  threads :24
+  priority: 90
   log:'metagenome_work_out/3.gene_predict/Gene/gene_Venn/Venn.log'     
   run:
-    shell('mkdir -p {output}')
-    shell("python {script_path}/Venn/Venn.py -i {input.OTU_table} -o {output} -a {params.interact} -m {input.mapped} -p {threads} 2> {log}")
+    shell("python {script_path}/Venn.py -i {input.OTU_table} -o {output} -c {params.interact} -m {input.mapped} -p {threads} 2> {log}")
     shell('rm {output}/*.r')
     shell('rm {output}/*.list')
 
@@ -42,16 +115,14 @@ rule corr_heatmap:
   input:
     OTU_table = 'metagenome_work_out/3.gene_predict/Gene/gene_depth/gene_abundance_table.txt'
   output:
-    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_table.csv',
-    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_pvalue.csv',
-    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance.spearman_cor_heatmap.pdf'
+    directory('metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap')
   log:
     'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/corr_heatmap.log'
-  params:
-    'metagenome_work_out/3.gene_predict/Gene/gene_samples_heatmap/gene_abundance'
+  priority: 90
   shell:
     """
-    Rscript {script_path}/corr/spearman_correlation.R {input} {params} 2 > {log}
+    mkdir -p {output}
+    Rscript {script_path}/spearman_correlation.R {input} {output} 2 > {log}
     """
 
 rule biom_convert:
@@ -60,4 +131,388 @@ rule biom_convert:
   shell:'biom convert -i {input} -o {output} --table-type="OTU table" --to-json' 
 
 rule ternary_plot:
+  input: 
+    otu = expand('metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{Rank}.txt', Rank = rank),
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/taxa_ternaryplot')
+  params:
+    comb = ' '.join(config["Ternary"].split(';')),
+    top = 10
+  priority:50
+  threads :24
+  log:'metagenome_work_out/6.taxa_statistics/taxa_ternaryplot/ternaryplot.log'
+  shell:
+    """ 
+    python {script_path}/ternary_plot.py -i {input.otu} -o {output} -m {input.mapped} -p {threads} -c {params.comb} --top {params.top} 2> {log}
+    """
+
+rule taxa_pca:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/beta/{rank}/PCA')
+  params:
+    "{rank}"
+  shell:
+    "Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}"
+
+rule taxa_betadiv:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/abundance_table_{rank}.biom',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/beta/{rank}/ordination')
+  params: factors = factors_file
+  run:
+    if factors_file :
+        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+    else:
+        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
+
+rule taxa_barplot:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/taxa_barplot/{rank}')
+  shell:
+    "Rscript {script_path}/matrix_barplot.R {input.otu} {input.mapped} {output}"
+
+rule taxa_heatmap:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/taxa_heatmap/{rank}')
+  shell:
+    "Rscript {script_path}/matrix_pheatmap.R {input.otu} {input.mapped} {output}"
+
+rule taxa_bubble:
+  input:'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt'
+  output: directory('metagenome_work_out/6.taxa_statistics/taxa_bubble/{rank}')
+  params: 
+    "top50_{rank}_abundance_table_bubbleplot" 
+  shell:
+    """
+    mkdir -p {output}
+    python {script_path}/MatrixUtil.py {input} --sort_descend > {output}/top_abundance_table.txt
+    head -n 50 {output}/top_abundance_table.txt > {output}/top50_abundance_table.txt
+    Rscript {script_path}/bubble_plot.R {output}/top50_abundance_table.txt {output}/{params}
+    """
+
+rule taxa_corr_heatmap:
+  input: 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt'
+  output: directory('metagenome_work_out/6.taxa_statistics/samples_heatmap/{rank}') 
+  shell:
+    """
+    mkdir -p {output}
+    Rscript {script_path}/spearman_correlation.R {input} {output} 
+    """
+
+rule taxa_upgma:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/6.taxa_statistics/taxa_UPGMA/{rank}')
+  shell:
+    "Rscript {script_path}/UPGMA_Tree_Plot.R {input.otu} {input.mapped} {output}"
+
+rule taxa_Venn:
+  input:
+    OTU_table = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output: directory('metagenome_work_out/6.taxa_statistics/taxa_Venn/{rank}')
+  params:
+    interact = ' '.join(config["Venn"].split(';'))
+  threads :24
+  priority:80
+  log:'metagenome_work_out/6.taxa_statistics/taxa_Venn/{rank}/Venn.log'
+  run:
+    shell("python {script_path}/Venn.py -i {input.OTU_table} -o {output} -c {params.interact} -m {input.mapped} -p {threads} 2> {log}")
+    shell('rm {output}/*.r')
+    shell('rm {output}/*.list')
+
+rule taxa_wilcox:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/6.taxa_statistics/taxa_sig_wilcox/{rank}')
+  run:
+    shell("mkdir -p {output}")
+    if compare: 
+        shell("Rscript {script_path}/wilcox_heatmap.R {input.otu} {input.mapped} {output}")
+    else:
+        shell("touch {output}/No_diffrence")
+
+rule taxa_ttest:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/6.taxa_statistics/taxa_sig_ttest/{rank}')
+  run:
+    shell("mkdir -p {output}")
+    if compare:
+        shell("Rscript {script_path}/ttest_heatmap.R {input.otu} {input.mapped} {output}")
+    else:
+        shell("touch {output}/No_difference")
+
+rule taxa_stack_otu:
+  input:
+    otu = 'metagenome_work_out/5.taxa/common_taxonomic/gene_taxa_relative_abundance.txt',
+    mapped = mapping_file
+  output: 'metagenome_work_out/5.taxa/common_taxonomic/stack_taxa_relative_abundance.txt'
+  priority: 100
+  shell: "python {script_path}/../StackTaxaAbundanceTable.py {input.otu} {input.mapped} {output}"
+
+rule taxa_lefse:
+  input: rules.taxa_stack_otu.output
+  params:
+    levels = 2,
+    # multiclass_strat 
+    # 0: one-against-all||1 :one-against-one
+    multiclass_strat = 1,
+    format_lefse = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/format_lefse.txt',
+    lefse_result = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/lefse_results.txt',
+    LDA_pdf = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/LDA.pdf',
+    LDA_png = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/LDA.png',
+    cladogram_pdf = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/lefse_cladogram_plot.pdf',
+    cladogram_png = 'metagenome_work_out/6.taxa_statistics/taxa_lefse/lefse_cladogram_plot.png',
+    Ncondition = ncondition
+  output:
+    directory('metagenome_work_out/6.taxa_statistics/taxa_lefse')
+  priority: 100
+  shell:
+    """
+    echo "source /home/zhangqy/miniconda3/etc/profile.d/conda.sh" > taxa_lefse.sh
+    echo "conda activate {envs_path}/lefse" >> taxa_lefse.sh
+    echo "mkdir {output}" >> taxa_lefse.sh
+    echo "format_input.py {input} {params.format_lefse} -c 1 -o 1000000 -s {subclass} -u {params.Ncondition}" >> taxa_lefse.sh
+    echo "run_lefse.py {params.format_lefse} {params.lefse_result} -l {params.levels} -y {params.multiclass_strat}" >> taxa_lefse.sh
+    echo "plot_res.py {params.lefse_result} {params.LDA_pdf} --format pdf --class_legend_font_size 8 --title_font_size 10 --left_space 0.3" >> taxa_lefse.sh
+    echo "if [ -s {params.LDA_pdf} ];then" >> taxa_lefse.sh
+    echo "  plot_res.py {params.lefse_result} {params.LDA_png} --format png --class_legend_font_size 8 --title_font_size 10 --left_space 0.3" >> taxa_lefse.sh
+    echo "  plot_cladogram.py {params.lefse_result} {params.cladogram_pdf} --format pdf --label_font_size 0 --labeled_start_lev 2 --labeled_stop_lev 6 --abrv_start_lev 4 --abrv_stop_lev 6 --class_legend_font_size 6" >> taxa_lefse.sh
+    echo "  plot_cladogram.py {params.lefse_result} {params.cladogram_png} --format png --label_font_size 0 --labeled_start_lev 2 --labeled_stop_lev 6 --abrv_start_lev 4 --abrv_stop_lev 6 --class_legend_font_size 6" >> taxa_lefse.sh
+    echo "  plot_features.py   --format png -f diff --archive zip {params.format_lefse} {params.lefse_result} {output}/biomarkers.zip" >> taxa_lefse.sh
+    echo "else" >> taxa_lefse.sh
+    echo "  echo nodiff" >> taxa_lefse.sh
+    echo "fi" >> taxa_lefse.sh
+    sh taxa_lefse.sh > taxa_lefse.log 
+    """
+
+rule func_biom_convert:
+  input: 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt'
+  output:'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.biom'
+  shell:'biom convert -i {input} -o {output} --table-type="OTU table" --to-json'
  
+rule func_pca:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/7.func_statistics/{func_keys}/beta/PCA/{func_values}')
+  params:
+    "{func_values}"
+  shell:
+    "Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}"
+
+rule func_betadiv:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.biom',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/7.func_statistics/{func_keys}/beta/ordination/{func_values}')
+  params: factors = str(factors_file)
+  run:
+    if factors_file :
+        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+    else:
+        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
+
+rule func_barplot:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/7.func_statistics/{func_keys}/func_barplot/{func_values}')
+  shell:
+    "Rscript {script_path}/matrix_barplot.R {input.otu} {input.mapped} {output}"
+
+rule func_heatmap:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:
+    directory('metagenome_work_out/7.func_statistics/{func_keys}/func_heatmap/{func_values}')
+  shell:
+    "Rscript {script_path}/matrix_pheatmap.R {input.otu} {input.mapped} {output}"
+
+rule func_bubble:
+  input:'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt'
+  output: directory('metagenome_work_out/7.func_statistics/{func_keys}/func_bubble/{func_values}')
+  params: 
+    "top50_{func_values}_abundance_table_bubbleplot" 
+  shell:
+    """
+    mkdir -p {output}
+    python {script_path}/MatrixUtil.py {input} --sort_descend > {output}/top_abundance_table.txt
+    head -n 50 {output}/top_abundance_table.txt > {output}/top50_abundance_table.txt
+    Rscript {script_path}/bubble_plot.R {output}/top50_abundance_table.txt {output}/{params}
+    """
+
+rule func_corr_heatmap:
+  input: 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt'
+  output: directory('metagenome_work_out/7.func_statistics/{func_keys}/samples_func_heatmap/{func_values}')
+  shell:
+    """
+    mkdir -p {output}
+    Rscript {script_path}/spearman_correlation.R {input} {output}
+    """
+
+rule func_upgma:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/7.func_statistics/{func_keys}/func_UPGMA/{func_values}')
+  shell:
+    "Rscript {script_path}/UPGMA_Tree_Plot.R {input.otu} {input.mapped} {output}"
+
+rule func_Venn:
+  input:
+    OTU_table = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output: directory('metagenome_work_out/7.func_statistics/{func_keys}/func_Venn/{func_values}')
+  params:
+    interact = ' '.join(config["Venn"].split(';'))
+  threads :24
+  priority:80
+  log:'metagenome_work_out/7.func_statistics/{func_keys}/func_Venn/{func_values}/Venn.log'
+  run:
+    shell("python {script_path}/Venn.py -i {input.OTU_table} -o {output} -c {params.interact} -m {input.mapped} -p {threads} 2> {log}")
+    shell('rm {output}/*.r')
+    shell('rm {output}/*.list')
+
+rule func_wilcox:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/7.func_statistics/{func_keys}/func_sig_wilcoxon/{func_values}')
+    
+  run:
+    shell("mkdir -p {output}")
+    if compare:
+        shell("Rscript {script_path}/wilcox_heatmap.R {input.otu} {input.mapped} {output}")
+    else:
+        shell("touch {output}/No_difference")
+
+rule func_ttest:
+  input:
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt',
+    mapped = mapping_file
+  output:directory('metagenome_work_out/7.func_statistics/{func_keys}/func_sig_ttest/{func_values}')
+  run:
+    shell("mkdir -p {output}")
+    if compare:
+        shell("Rscript {script_path}/ttest_heatmap.R {input.otu} {input.mapped} {output}")
+    else:
+        shell("touch {output}/No_difference")
+
+rule func_lefse:
+  input: 
+    otu = 'metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt', 
+    mapped = mapping_file
+  params:
+    levels = 2,
+    # multiclass_strat 
+    # 0: one-against-all||1 :one-against-one
+    multiclass_strat = 0,
+    format_lefse = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/format_lefse.txt',
+    lefse_result = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/lefse_results.txt',
+    LDA_pdf = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/LDA.pdf',
+    LDA_png = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/LDA.png',
+    cladogram_pdf = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/lefse_cladogram_plot.pdf',
+    cladogram_png = 'metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}/lefse_cladogram_plot.png',
+    Ncondition = ncondition
+  output:
+    directory('metagenome_work_out/7.func_statistics/{func_keys}/func_lefse/{func_values}')
+  priority: 100
+  shell:
+    """
+    mkdir -p {output}
+    python {script_path}/../merged_abundance_table.py {input.otu} {input.mapped} {output}/{wildcards.func_values}_lefse_input.txt
+    echo "source /home/zhangqy/miniconda3/etc/profile.d/conda.sh" > {wildcards.func_values}_lefse.sh
+    echo "conda activate {envs_path}/lefse" >> {wildcards.func_values}_lefse.sh
+    echo "format_input.py {output}/{wildcards.func_values}_lefse_input.txt {params.format_lefse} -c 1 -o 1000000 -s {subclass} -u {params.Ncondition}" >> {wildcards.func_values}_lefse.sh
+    echo "run_lefse.py {params.format_lefse} {params.lefse_result} -l {params.levels} -y {params.multiclass_strat}" >> {wildcards.func_values}_lefse.sh
+    echo "plot_res.py {params.lefse_result} {params.LDA_pdf} --format pdf --class_legend_font_size 8 --title_font_size 10 --left_space 0.3" >> {wildcards.func_values}_lefse.sh
+    echo "if [ -s {params.LDA_pdf} ] ;then" >> {wildcards.func_values}_lefse.sh 
+    echo "  plot_res.py {params.lefse_result} {params.LDA_png} --format png --class_legend_font_size 8 --title_font_size 10 --left_space 0.3" >> {wildcards.func_values}_lefse.sh
+    echo "  plot_cladogram.py {params.lefse_result} {params.cladogram_pdf} --format pdf --label_font_size 4 --labeled_start_lev 2 --labeled_stop_lev 6 --abrv_start_lev 4 --abrv_stop_lev 6 --class_legend_font_size 6" >> {wildcards.func_values}_lefse.sh
+    echo "  plot_cladogram.py {params.lefse_result} {params.cladogram_png} --format png --label_font_size 4 --labeled_start_lev 2 --labeled_stop_lev 6 --abrv_start_lev 4 --abrv_stop_lev 6 --class_legend_font_size 6" >> {wildcards.func_values}_lefse.sh
+    echo "  plot_features.py  --format png -f diff --archive zip {params.format_lefse} {params.lefse_result} {output}/biomarkers.zip" >> {wildcards.func_values}_lefse.sh 
+    echo "else " >> {wildcards.func_values}_lefse.sh
+    echo "  echo nodiff" >> {wildcards.func_values}_lefse.sh
+    echo "fi" >> {wildcards.func_values}_lefse.sh
+    sh {wildcards.func_values}_lefse.sh > {wildcards.func_values}_lefse.log 
+    """
+
+rule taxa_env_corr:
+  input: 
+    otu = "metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt"
+  params:
+    factor = factors_file
+  output:
+    directory("metagenome_work_out/6.taxa_statistics/taxa_env_heatmap/{rank}")
+  run:
+    if factors_file :
+        shell("Rscript {script_path}/env_corr_heatmap.R {input.otu} {params.factor} {output}")
+    else:
+        shell("mkdir -p {output}")
+        shell("touch {output}/no_factors")
+
+rule func_env_corr:
+  input: 
+    otu = "metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt",
+  output:
+    directory("metagenome_work_out/7.func_statistics/{func_keys}/func_env_heatmap/{func_values}")
+  params:
+    factor = factors_file
+  run:
+    if factors_file :
+        shell("Rscript {script_path}/env_corr_heatmap.R {input.otu} {params.factor} {output}")
+    else:
+        shell("mkdir -p {output}")
+        shell("touch {output}/no_factors")
+
+rule taxa_vpa:
+  input: 
+    otu = "metagenome_work_out/5.taxa/common_taxonomic/Table_taxa_NR_{rank}.txt",
+  output:
+    directory("metagenome_work_out/6.taxa_statistics/taxa_vpa/{rank}")
+  params:
+    factor = factors_file
+  log:"metagenome_work_out/6.taxa_statistics/taxa_vpa/{rank}/vpa.log"
+  log:"metagenome_work_out/6.taxa_statistics/taxa_vpa/{rank}/vpa.log"
+  run:
+    if factors_file :
+        shell("python {script_path}/draw_VPA.py {input.otu} {params.factor} {output} 2 > {log} ")
+    else:
+        shell("mkdir -p {output}")
+        shell("touch {output}/no_factors")
+
+rule func_vpa:
+  input:
+    otu = "metagenome_work_out/4.annotation/Unigenes/{func_keys}/abundance_{func_values}.txt",
+  output:
+    directory("metagenome_work_out/7.func_statistics/{func_keys}/func_vpa/{func_values}")
+  params:
+    factor = factors_file
+  log:"metagenome_work_out/7.func_statistics/{func_keys}/func_vpa/{func_values}/vpa.log"
+  run:
+    if factors_file :
+        shell("python {script_path}/draw_VPA.py {input.otu} {params.factor} {output} 2 > {log} ")
+    else:
+        shell("mkdir -p {output}")
+        shell("touch {output}/no_factors")
