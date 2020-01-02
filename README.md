@@ -49,8 +49,7 @@ $ python metagenome_pipeline_2taxa.py metagenome_config_2taxa.txt
 $ nohup sh predict.sh > predict.log &
 # 待预测完成后， 注释
 $ nohup sh annotation.sh > annotation.log &
-# 待注释完成后, 统计
-$ wget https://github.com/QIngyuanfl/predict-annotation-for-metagenome/edit/master/pipeline/Snakefile
+# 待注释完成后, 将Snakefile 复制到项目文件夹
 $ conda deactivate
 $ source activate /sydata/Meta/conda_envs/MetaSnakemake
 $ nohup snakemake --cores 32 > stat.log &
