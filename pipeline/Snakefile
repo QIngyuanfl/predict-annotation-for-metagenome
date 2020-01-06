@@ -1,7 +1,7 @@
 # Make file for metagenome analysis, statistics part.
-# Thu Jan  2 10:39:19 CST 2020
+# Thu Jan  4 10:39:19 CST 2020
 # Author: Qingyuan Zhang
-# Version: V1.1
+# Version: V1.2
 # @copyright: Magigene
 import re
 import os
@@ -15,6 +15,7 @@ mapping_file = os.path.abspath(config["samples"])
 factors_file = config["factors"]
 mail = config["mail_address"]
 mapping = pd.read_table(mapping_file, index_col = '#SampleID')
+Nsample = len(mapping.index)
 group_cnt = []
 for col in mapping:
     if col == 'SampleID':
@@ -30,7 +31,7 @@ if ncondition > 2:
     subclass = 2
 else:
     subclass = -1
-rank = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
+rank = ['Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species']
 func = {'KEGG':['kegg-ko', 'kegg-L1', 'kegg-L2', 'kegg-L3'],
         'CAZy':['cazy-family', 'cazy-L1'],
         'NOG':['nog-L1', 'nog-L2']}
@@ -155,8 +156,12 @@ rule taxa_pca:
     directory('metagenome_work_out/6.taxa_statistics/beta/{rank}/PCA')
   params:
     "{rank}"
-  shell:
-    "Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}"
+  run:
+    if Nsample > 2:
+        shell("Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}")
+    else:
+        shell("mkdir -p {output}")
+        
 
 rule taxa_betadiv:
   input:
@@ -166,10 +171,13 @@ rule taxa_betadiv:
     directory('metagenome_work_out/6.taxa_statistics/beta/{rank}/ordination')
   params: factors = factors_file
   run:
-    if factors_file :
-        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+    if Nsample > 2:
+        if factors_file :
+            shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+        else:
+            shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
     else:
-        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
+        shell("mkdir -p {output}")
 
 rule taxa_barplot:
   input:
@@ -262,9 +270,15 @@ rule taxa_stack_otu:
   input:
     otu = 'metagenome_work_out/5.taxa/common_taxonomic/gene_taxa_relative_abundance.txt',
     mapped = mapping_file
+  params:
+    threshold = 0.0001
   output: 'metagenome_work_out/5.taxa/common_taxonomic/stack_taxa_relative_abundance.txt'
   priority: 100
-  shell: "python {script_path}/../StackTaxaAbundanceTable.py {input.otu} {input.mapped} {output}"
+  shell: """
+  python {script_path}/../StackTaxaAbundanceTable.py {input.otu} {input.mapped} {output}
+  python {script_path}/AbundanceFilter.py {output} {output}.tmp {input.mapped} {params.threshold}
+  mv {output}.tmp {output}
+  """
 
 rule taxa_lefse:
   input: rules.taxa_stack_otu.output
@@ -315,8 +329,11 @@ rule func_pca:
     directory('metagenome_work_out/7.func_statistics/{func_keys}/beta/PCA/{func_values}')
   params:
     "{func_values}"
-  shell:
-    "Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}"
+  run:
+    if Nsample > 2:
+        shell("Rscript {script_path}/PCA.R {input.mapped} {input.otu} {params} {output}")
+    else:
+        shell("mkdir -p {output} ")
 
 rule func_betadiv:
   input:
@@ -326,10 +343,13 @@ rule func_betadiv:
     directory('metagenome_work_out/7.func_statistics/{func_keys}/beta/ordination/{func_values}')
   params: factors = str(factors_file)
   run:
-    if factors_file :
-        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+    if Nsample > 2:
+        if factors_file :
+            shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output} {params.factors}")
+        else:
+            shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
     else:
-        shell("Rscript {script_path}/betadiv.R {input.otu} {input.mapped} {output}")
+        shell("mkdir -p {output}")
 
 rule func_barplot:
   input:
