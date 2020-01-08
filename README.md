@@ -51,7 +51,7 @@ $ nohup sh predict.sh > predict.log &
 $ nohup sh annotation.sh > annotation.log &
 # 待注释完成后, 将Snakefile 复制到项目文件夹
 $ conda deactivate
-$ source activate /sydata/Meta/conda_envs/MetaSnakemake
+$ source activate /sysdata/Meta/conda_envs/MetaSnakemake
 $ nohup snakemake --cores 32 > stat.log &
 # 统计完成后
 $ sh do_clean.sh
